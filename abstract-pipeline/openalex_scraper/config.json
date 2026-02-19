@@ -1,0 +1,41 @@
+{
+  "ranking_preset": "Balanced",
+  "openalex_field_id": "C169760540",
+  "max_items_to_scrape": 1000000,
+  "database_max_size": 1000000,
+  "curate_database_size": true,
+  "api_settings": {
+    "min_citations": 0,
+    "max_items_per_concept": 1000
+  },
+  "ranking_algorithm": {
+    "alpha": 0.4,
+    "beta": 0.6
+  },
+  "enabled_subfields": [
+    {"id": "C169760540", "display_name": "Neuroscience"},
+    {"id": "C17289045", "display_name": "Cognitive neuroscience"},
+    {"id": "C138917182", "display_name": "Behavioral neuroscience"},
+    {"id": "C15286952", "display_name": "Computational neuroscience"},
+    {"id": "C2081992", "display_name": "Clinical neuroscience"},
+    {"id": "C194043247", "display_name": "Molecular neuroscience"},
+    {"id": "C31288803", "display_name": "Systems neuroscience"},
+    {"id": "C14855644", "display_name": "Affective neuroscience"},
+    {"id": "C170320452", "display_name": "Social neuroscience"},
+    {"id": "C86529352", "display_name": "Developmental cognitive neuroscience"},
+    {"id": "C74937081", "display_name": "Cultural neuroscience"},
+    {"id": "C29993825", "display_name": "Neuroscience of sleep"},
+    {"id": "C103072069", "display_name": "Cellular neuroscience"},
+    {"id": "C113731916", "display_name": "Evolutionary neuroscience"},
+    {"id": "C142930883", "display_name": "Educational neuroscience"},
+    {"id": "C188147891", "display_name": "Cognitive science"},
+    {"id": "C15744967", "display_name": "Psychology"},
+    {"id": "C180747234", "display_name": "Cognitive psychology"},
+    {"id": "C14216870", "display_name": "Neuropsychology"},
+    {"id": "C185263204", "display_name": "Electrophysiology"},
+    {"id": "C58693492", "display_name": "Neuroimaging"},
+    {"id": "C2779226451", "display_name": "Functional magnetic resonance imaging"},
+    {"id": "C2777670902", "display_name": "Human brain"},
+    {"id": "C2779345533", "display_name": "Visual cortex"}
+  ]
+}

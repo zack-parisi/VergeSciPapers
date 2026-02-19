@@ -1,0 +1,6 @@
+{
+  "ranking_algorithm": {
+    "alpha": 0.4,
+    "beta": 0.6
+  }
+}

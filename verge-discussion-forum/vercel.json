@@ -1,0 +1,21 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "installCommand": "npm install",
+  "devCommand": "npm run dev",
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 60
+    },
+    "app/api/auth/**/*.ts": {
+      "maxDuration": 30
+    },
+    "app/api/health/**/*.ts": {
+      "maxDuration": 15
+    }
+  },
+  "env": {
+    "NODE_ENV": "production"
+  }
+} 

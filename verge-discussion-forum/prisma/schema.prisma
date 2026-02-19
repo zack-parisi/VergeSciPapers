@@ -1,0 +1,502 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                         String                  @id @default(uuid())
+  email                      String                  @unique
+  emailVerified              DateTime?
+  passwordHash               String
+  canInteract                Boolean                 @default(false)
+  school                     String?
+  firstName                  String?
+  lastName                   String?
+  education                  String?
+  degree                     String?
+  undergraduateStudent       Boolean?
+  graduateStudent            Boolean?
+  researchTechnician         Boolean?
+  postdoctoralScholar        Boolean?
+  principalInvestigator      Boolean?
+  industryProfessional       Boolean?
+  medicalStudent             Boolean?
+  resident                   Boolean?
+  physician                  Boolean?
+  clinician                  Boolean?
+  otherRole                  String?
+  intendedDegree             String?
+  about                      String?
+  labAffiliation             String?
+  currentProjects            String?
+  twoFactorEnabled           Boolean                 @default(false)
+  bypass2FA                  Boolean                 @default(false)
+  twoFactorCode              String?
+  twoFactorCodeExpires       DateTime?
+  hasCompletedOnboarding     Boolean                 @default(false)
+  bookmarks                  Bookmark[]
+  comments                   Comment[]
+  commentUpvotes             CommentUpvote[]
+  connectionsReceived        Connection[]            @relation("UserConnectionTo")
+  connectionsSent            Connection[]            @relation("UserConnection")
+  connectionRequestsReceived ConnectionRequest[]     @relation("RequestTo")
+  connectionRequestsSent     ConnectionRequest[]     @relation("RequestFrom")
+  grants                     Grant[]
+  grantBookmarks             GrantBookmark[]
+  grantLikes                 GrantLike[]
+  posts                      Post[]
+  reposts                    Repost[]
+  repostLikes                RepostLike[]
+  eurekaReposts              EurekaRepost[]
+  eurekaRepostLikes          EurekaRepostLike[]
+  savedCategories            SavedCategory[]
+  savedGrantNotes            SavedGrantNote[]
+  savedPostNotes             SavedPostNote[]
+  savedStaffPostNotes        SavedStaffPostNote[]
+  staffPosts                 StaffPost[]
+  staffPostLikes             StaffPostLike[]
+  staffPostActivities        StaffPostUserActivity[]
+  mongoDBPaperLikes          MongoDBPaperLike[]
+  mongoDBPaperBookmarks      MongoDBPaperBookmark[]
+  researchInterests          UserSubfield[]
+}
+
+model Post {
+  id                 Int                 @id @default(autoincrement())
+  userId             String
+  content            String
+  createdAt          DateTime            @default(now())
+  saveCount          Int                 @default(0)
+  bookmarks          Bookmark[]
+  comments           Comment[]
+  user               User                @relation(fields: [userId], references: [id])
+  repost             Repost?             @relation("PostToRepost")
+  eurekaRepost       EurekaRepost?       @relation("PostToEurekaRepost")
+  savedCategoryPosts SavedCategoryPost[]
+  savedPostNotes     SavedPostNote[]
+}
+
+model Comment {
+  id          Int             @id @default(autoincrement())
+  userId      String
+  content     String
+  createdAt   DateTime        @default(now())
+  parentId    Int?
+  deleted     Boolean         @default(false)
+  postId      Int?
+  staffPostId Int?
+  grantId     Int?
+  parent      Comment?        @relation("CommentReplies", fields: [parentId], references: [id])
+  replies     Comment[]       @relation("CommentReplies")
+  grant       Grant?          @relation(fields: [grantId], references: [id])
+  staffPost   StaffPost?      @relation(fields: [staffPostId], references: [id])
+  post        Post?           @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user        User            @relation(fields: [userId], references: [id])
+  upvotes     CommentUpvote[]
+}
+
+model Repost {
+  id          Int          @id @default(autoincrement())
+  userId      String
+  staffPostId Int
+  postId      Int          @unique
+  content     String?
+  createdAt   DateTime     @default(now())
+  post        Post         @relation("PostToRepost", fields: [postId], references: [id], onDelete: Cascade)
+  staffPost   StaffPost    @relation(fields: [staffPostId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
+  likes       RepostLike[]
+}
+
+model EurekaRepost {
+  id          Int          @id @default(autoincrement())
+  userId      String
+  postId      Int          @unique
+  content     String?      // User's comment on the Eureka result
+  eurekaData  Json         // Complete Eureka result data (content, metadata, papers, etc.)
+  createdAt   DateTime     @default(now())
+  post        Post         @relation("PostToEurekaRepost", fields: [postId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [userId], references: [id])
+  likes       EurekaRepostLike[]
+}
+
+
+model Subfield {
+  id            Int            @id @default(autoincrement())
+  name          String         @unique
+  userInterests UserSubfield[]
+  grants        Grant[]        @relation("GrantSubfields")
+  staffPosts    StaffPost[]    @relation("StaffPostSubfields")
+}
+
+model StaffPost {
+  id                      Int                      @id @default(autoincrement())
+  userId                  String
+  title                   String
+  publicationDate         DateTime
+  citedByCount            Int
+  abstract                String
+  doi                     String
+  linkId                  String
+  citation                String                   @default("")
+  relevanceScore          Float?
+  createdAt               DateTime                 @default(now())
+  bookmarks               Bookmark[]
+  citationUpdateHistory   CitationUpdateHistory[]
+  citationUpdates         CitationUpdateMetadata?
+  citationUpdateQueue     CitationUpdateQueue[]
+  comments                Comment[]
+  reposts                 Repost[]
+  savedCategoryStaffPosts SavedCategoryStaffPost[]
+  savedStaffPostNotes     SavedStaffPostNote[]
+  user                    User                     @relation(fields: [userId], references: [id])
+  authors                 StaffPostAuthor[]
+  likes                   StaffPostLike[]
+  staffPostSubfields      StaffPostSubfield[]
+  userActivities          StaffPostUserActivity[]
+  subfields               Subfield[]               @relation("StaffPostSubfields")
+}
+
+model StaffPostAuthor {
+  id          Int       @id @default(autoincrement())
+  name        String
+  staffPostId Int
+  staffPost   StaffPost @relation(fields: [staffPostId], references: [id])
+}
+
+model Bookmark {
+  id          Int        @id @default(autoincrement())
+  userId      String
+  postId      Int?
+  staffPostId Int?
+  createdAt   DateTime   @default(now())
+  staffPost   StaffPost? @relation(fields: [staffPostId], references: [id])
+  post        Post?      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user        User       @relation(fields: [userId], references: [id])
+
+  @@unique([userId, postId])
+  @@unique([userId, staffPostId])
+}
+
+model SavedCategory {
+  id         Int                      @id @default(autoincrement())
+  userId     String
+  name       String
+  createdAt  DateTime                 @default(now())
+  user       User                     @relation(fields: [userId], references: [id])
+  grants     SavedCategoryGrant[]
+  note       SavedCategoryNote?
+  posts      SavedCategoryPost[]
+  staffPosts SavedCategoryStaffPost[]
+}
+
+model SavedCategoryStaffPost {
+  id          Int           @id @default(autoincrement())
+  categoryId  Int
+  staffPostId Int
+  createdAt   DateTime      @default(now())
+  staffPost   StaffPost     @relation(fields: [staffPostId], references: [id], onDelete: Cascade)
+  category    SavedCategory @relation(fields: [categoryId], references: [id])
+
+  @@unique([categoryId, staffPostId])
+}
+
+model SavedCategoryPost {
+  id         Int           @id @default(autoincrement())
+  categoryId Int
+  postId     Int
+  createdAt  DateTime      @default(now())
+  post       Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  category   SavedCategory @relation(fields: [categoryId], references: [id])
+
+  @@unique([categoryId, postId])
+}
+
+model SavedCategoryGrant {
+  id         Int           @id @default(autoincrement())
+  categoryId Int
+  grantId    Int
+  createdAt  DateTime      @default(now())
+  grant      Grant         @relation(fields: [grantId], references: [id], onDelete: Cascade)
+  category   SavedCategory @relation(fields: [categoryId], references: [id])
+
+  @@unique([categoryId, grantId])
+}
+
+model SavedCategoryNote {
+  id         Int           @id @default(autoincrement())
+  categoryId Int           @unique
+  content    String
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  category   SavedCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+}
+
+model SavedPostNote {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  postId    Int
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+}
+
+model SavedStaffPostNote {
+  id          Int       @id @default(autoincrement())
+  userId      String
+  staffPostId Int
+  content     String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  staffPost   StaffPost @relation(fields: [staffPostId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, staffPostId])
+}
+
+model SavedGrantNote {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  grantId   Int
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  grant     Grant    @relation(fields: [grantId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, grantId])
+}
+
+model CommentUpvote {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  commentId Int
+  createdAt DateTime @default(now())
+  comment   Comment  @relation(fields: [commentId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, commentId])
+}
+
+model StaffPostLike {
+  id          Int       @id @default(autoincrement())
+  userId      String
+  staffPostId Int
+  createdAt   DateTime  @default(now())
+  staffPost   StaffPost @relation(fields: [staffPostId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@unique([userId, staffPostId])
+}
+
+model RepostLike {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  repostId  Int
+  createdAt DateTime @default(now())
+  repost    Repost   @relation(fields: [repostId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, repostId])
+}
+
+model EurekaRepostLike {
+  id            Int          @id @default(autoincrement())
+  userId        String
+  eurekaRepostId Int
+  createdAt     DateTime     @default(now())
+  eurekaRepost  EurekaRepost @relation(fields: [eurekaRepostId], references: [id])
+  user          User         @relation(fields: [userId], references: [id])
+
+  @@unique([userId, eurekaRepostId])
+}
+
+model Grant {
+  id                  Int                  @id @default(autoincrement())
+  userId              String
+  title               String
+  subfield            String?
+  eligibility         String
+  description         String
+  deadline            DateTime
+  fundingAmount       String
+  grantWebsiteUrl     String
+  status              String               @default("private")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  comments            Comment[]
+  user                User                 @relation(fields: [userId], references: [id])
+  bookmarks           GrantBookmark[]
+  likes               GrantLike[]
+  savedCategoryGrants SavedCategoryGrant[]
+  savedGrantNotes     SavedGrantNote[]
+  subfields           Subfield[]           @relation("GrantSubfields")
+}
+
+model GrantBookmark {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  grantId   Int
+  createdAt DateTime @default(now())
+  grant     Grant    @relation(fields: [grantId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, grantId])
+}
+
+model GrantLike {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  grantId   Int
+  createdAt DateTime @default(now())
+  grant     Grant    @relation(fields: [grantId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, grantId])
+}
+
+model StaffPostSubfield {
+  id          Int       @id @default(autoincrement())
+  name        String
+  staffPostId Int
+  staffPost   StaffPost @relation(fields: [staffPostId], references: [id])
+}
+
+model UserSubfield {
+  id         Int      @id @default(autoincrement())
+  userId     String
+  subfieldId Int
+  createdAt  DateTime @default(now())
+  subfield   Subfield @relation(fields: [subfieldId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, subfieldId])
+}
+
+model ConnectionRequest {
+  id          Int       @id @default(autoincrement())
+  fromUserId  String
+  toUserId    String
+  status      String    @default("PENDING")
+  createdAt   DateTime  @default(now())
+  respondedAt DateTime?
+  toUser      User      @relation("RequestTo", fields: [toUserId], references: [id])
+  fromUser    User      @relation("RequestFrom", fields: [fromUserId], references: [id])
+
+  @@unique([fromUserId, toUserId])
+}
+
+model Connection {
+  id           Int      @id @default(autoincrement())
+  userId       String
+  connectionId String
+  createdAt    DateTime @default(now())
+  connection   User     @relation("UserConnectionTo", fields: [connectionId], references: [id])
+  user         User     @relation("UserConnection", fields: [userId], references: [id])
+
+  @@unique([userId, connectionId])
+}
+
+model CitationUpdateMetadata {
+  id                      Int       @id @default(autoincrement())
+  staffPostId             Int       @unique
+  lastUpdateTimestamp     DateTime  @default(now())
+  nextScheduledUpdate     DateTime
+  priorityScore           Float     @default(0.0)
+  updateFrequencyTier     String    @default("low")
+  citationCount           Int       @default(0)
+  citationVelocity        Float     @default(0.0)
+  lastCitationCount       Int       @default(0)
+  lastVelocityCalculation DateTime  @default(now())
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  staffPost               StaffPost @relation(fields: [staffPostId], references: [id], onDelete: Cascade)
+
+  @@index([priorityScore])
+  @@index([nextScheduledUpdate])
+  @@index([updateFrequencyTier])
+}
+
+model CitationUpdateQueue {
+  id            Int       @id @default(autoincrement())
+  staffPostId   Int
+  priorityScore Float     @default(0.0)
+  scheduledTime DateTime
+  retryCount    Int       @default(0)
+  status        String    @default("pending")
+  createdAt     DateTime  @default(now())
+  staffPost     StaffPost @relation(fields: [staffPostId], references: [id], onDelete: Cascade)
+
+  @@index([priorityScore, scheduledTime])
+  @@index([status])
+}
+
+model CitationUpdateHistory {
+  id                 Int       @id @default(autoincrement())
+  staffPostId        Int
+  oldCitationCount   Int
+  newCitationCount   Int
+  citationDelta      Int
+  velocityCalculated Float     @default(0.0)
+  updateTrigger      String    @default("scheduled")
+  processingTimeMs   Int       @default(0)
+  success            Boolean   @default(true)
+  errorMessage       String?
+  createdAt          DateTime  @default(now())
+  staffPost          StaffPost @relation(fields: [staffPostId], references: [id], onDelete: Cascade)
+
+  @@index([staffPostId, createdAt])
+  @@index([updateTrigger])
+  @@index([success])
+}
+
+model StaffPostUserActivity {
+  id                Int       @id @default(autoincrement())
+  staffPostId       Int
+  userId            String
+  activityType      String
+  activityTimestamp DateTime  @default(now())
+  timeSpentMs       Int?
+  scrollPercentage  Float?
+  hasInteracted     Boolean   @default(false)
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  staffPost         StaffPost @relation(fields: [staffPostId], references: [id], onDelete: Cascade)
+
+  @@unique([staffPostId, userId, activityType])
+  @@index([staffPostId, activityTimestamp])
+  @@index([userId, activityTimestamp])
+  @@index([activityType])
+}
+
+model MongoDBPaperLike {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  paperId   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, paperId])
+  @@index([paperId])
+  @@index([userId])
+}
+
+model MongoDBPaperBookmark {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  paperId   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, paperId])
+  @@index([paperId])
+  @@index([userId])
+}
+

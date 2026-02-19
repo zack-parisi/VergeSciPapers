@@ -1,0 +1,16 @@
+# Core Scrapy framework
+scrapy>=2.11.0
+
+# Database and environment
+pymongo>=4.6.0
+python-dotenv>=1.0.0
+
+# HTTP and parsing
+requests>=2.31.0
+lxml>=4.9.0
+
+# Browser automation (for complex sites)
+selenium>=4.15.0
+
+# Compression support
+brotli>=1.0.9 

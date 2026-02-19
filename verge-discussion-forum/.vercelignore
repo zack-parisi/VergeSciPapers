@@ -1,0 +1,36 @@
+# Exclude large database files from deployment
+prisma/dev.db.backup
+prisma/dev.db.current_backup
+prisma/dev.db.latest
+prisma/__init__.py
+
+# Exclude other large files and directories
+node_modules
+.next
+*.log
+venv
+abstract_venv
+abstract_scripts_venv
+migration_venv
+stress-test
+
+# Exclude development and test files
+scripts/
+test-*.js
+debug-*.js
+check-*.js
+*.test.js
+*.spec.js
+
+# Exclude documentation files
+*.md
+!README.md
+
+# Exclude backup files
+*.backup
+*.bak
+
+# Exclude environment files (will be set in Vercel dashboard)
+.env
+.env.local
+.env.local.backup 

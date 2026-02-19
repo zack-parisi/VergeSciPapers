@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Environment variables
+.env
+.env.local
+
+# Logs and output files
+*.log
+*.txt
+!requirements.txt
+
+# Data files
+*.json
+!config.json
+!openalex_scraper/config.json
+!premium-openalex/config.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Distribution
+dist/
+build/
+*.egg-info/
+
+# Scrapy cache
+.scrapy/
+
+# Docker volumes
+api_logs/
+

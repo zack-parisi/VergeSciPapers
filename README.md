@@ -89,7 +89,7 @@ Batch processing scripts that generate OpenAI embeddings for the paper corpus, e
 
 **What it does:**
 - Vectorizes paper titles and abstracts using OpenAI's `text-embedding-3-small` model
-- Batch processing with checkpointing for large-scale runs (100k+ papers)
+- Batch processing with checkpointing for large-scale runs
 - Progress monitoring, cost estimation, and quality verification
 - Identifies and processes unvectorized papers incrementally
 
